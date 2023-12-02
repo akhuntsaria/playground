@@ -1,7 +1,6 @@
 from __future__ import unicode_literals, print_function, division
 from io import open
-import unicodedata
-import math, random, re, time
+import os, math, random, re, time, unicodedata
 
 import torch
 import torch.nn as nn
@@ -14,7 +13,11 @@ from torch.utils.data import TensorDataset, DataLoader, RandomSampler
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+os.system('clear')
+
+# Fix NaNs and revert
+#device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+device = torch.device("cpu")
 print(device)
 
 SOS_token = 0
@@ -195,7 +198,7 @@ def get_dataloader(batch_size):
 
     train_sampler = RandomSampler(train_data)
     train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=batch_size)
-    return input_lang, output_lang, train_dataloader
+    return input_lang, output_lang, train_dataloader, pairs
 
 def train_epoch(dataloader, encoder, decoder, encoder_optimizer,
           decoder_optimizer, criterion):
@@ -214,6 +217,8 @@ def train_epoch(dataloader, encoder, decoder, encoder_optimizer,
             decoder_outputs.view(-1, decoder_outputs.size(-1)),
             target_tensor.view(-1)
         )
+        if torch.isnan(loss).any():
+            raise Exception('NaN loss')
         loss.backward()
 
         encoder_optimizer.step()
@@ -292,9 +297,10 @@ def evaluate(encoder, decoder, sentence, input_lang, output_lang):
             decoded_words.append(output_lang.index2word[idx.item()])
     return decoded_words, decoder_attn
 
-def evaluateRandomly(encoder, decoder, n=10):
+def evaluateRandomly(encoder, decoder, pairs, n=10):
     for i in range(n):
-        pair = random.choice(pairs)
+        #pair = random.choice(pairs)
+        pair = input("source: "), input("target: ")
         print('>', pair[0])
         print('=', pair[1])
         output_words, _ = evaluate(encoder, decoder, pair[0], input_lang, output_lang)
@@ -302,12 +308,21 @@ def evaluateRandomly(encoder, decoder, n=10):
         print('<', output_sentence)
         print('')
 
-hidden_size = 128
+hidden_size = 512
 batch_size = 32
 
-input_lang, output_lang, train_dataloader = get_dataloader(batch_size)
+input_lang, output_lang, train_dataloader, pairs = get_dataloader(batch_size)
 
 encoder = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 decoder = DecoderRNN(hidden_size, output_lang.n_words).to(device)
 
-train(train_dataloader, encoder, decoder, 80, print_every=5, plot_every=5)
+print("Training...")
+train(train_dataloader, encoder, decoder, 1, print_every=1, plot_every=5)
+
+encoder.eval()
+decoder.eval()
+evaluateRandomly(encoder, decoder, pairs)
+
+#TODO
+#Save the model
+#Interactive evaluation
