@@ -23,6 +23,9 @@ print(device)
 SOS_token = 0
 EOS_token = 1
 
+MAX_LENGTH = 4
+MAX_LINES = 1000
+
 class Lang:
     def __init__(self, name):
         self.name = name
@@ -67,7 +70,7 @@ def readLangs(lang1, lang2, reverse=False):
         read().strip().split('\n')
 
     # Split every line into pairs and normalize
-    pairs = [[normalizeString(s) for s in l.split('\t')[:2]] for l in lines]
+    pairs = [[normalizeString(s) for s in l.split('\t')[:2]] for l in lines[:MAX_LINES]]
 
     # Reverse pairs, make Lang instances
     if reverse:
@@ -79,8 +82,6 @@ def readLangs(lang1, lang2, reverse=False):
         output_lang = Lang(lang2)
 
     return input_lang, output_lang, pairs
-
-MAX_LENGTH = 10
 
 eng_prefixes = (
     "i am ", "i m ",
@@ -129,22 +130,44 @@ class EncoderRNN(nn.Module):
         output, hidden = self.gru(embedded)
         return output, hidden
 
-class DecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size):
-        super(DecoderRNN, self).__init__()
+class BahdanauAttention(nn.Module):
+    def __init__(self, hidden_size):
+        super(BahdanauAttention, self).__init__()
+        self.Wa = nn.Linear(hidden_size, hidden_size)
+        self.Ua = nn.Linear(hidden_size, hidden_size)
+        self.Va = nn.Linear(hidden_size, 1)
+
+    def forward(self, query, keys):
+        scores = self.Va(torch.tanh(self.Wa(query) + self.Ua(keys)))
+        scores = scores.squeeze(2).unsqueeze(1)
+
+        weights = F.softmax(scores, dim=-1)
+        context = torch.bmm(weights, keys)
+
+        return context, weights
+
+class AttnDecoderRNN(nn.Module):
+    def __init__(self, hidden_size, output_size, dropout_p=0.1):
+        super(AttnDecoderRNN, self).__init__()
         self.embedding = nn.Embedding(output_size, hidden_size)
-        self.gru = nn.GRU(hidden_size, hidden_size, batch_first=True)
+        self.attention = BahdanauAttention(hidden_size)
+        self.gru = nn.GRU(2 * hidden_size, hidden_size, batch_first=True)
         self.out = nn.Linear(hidden_size, output_size)
+        self.dropout = nn.Dropout(dropout_p)
 
     def forward(self, encoder_outputs, encoder_hidden, target_tensor=None):
         batch_size = encoder_outputs.size(0)
         decoder_input = torch.empty(batch_size, 1, dtype=torch.long, device=device).fill_(SOS_token)
         decoder_hidden = encoder_hidden
         decoder_outputs = []
+        attentions = []
 
         for i in range(MAX_LENGTH):
-            decoder_output, decoder_hidden  = self.forward_step(decoder_input, decoder_hidden)
+            decoder_output, decoder_hidden, attn_weights = self.forward_step(
+                decoder_input, decoder_hidden, encoder_outputs
+            )
             decoder_outputs.append(decoder_output)
+            attentions.append(attn_weights)
 
             if target_tensor is not None:
                 # Teacher forcing: Feed the target as the next input
@@ -156,14 +179,22 @@ class DecoderRNN(nn.Module):
 
         decoder_outputs = torch.cat(decoder_outputs, dim=1)
         decoder_outputs = F.log_softmax(decoder_outputs, dim=-1)
-        return decoder_outputs, decoder_hidden, None # We return `None` for consistency in the training loop
+        attentions = torch.cat(attentions, dim=1)
 
-    def forward_step(self, input, hidden):
-        output = self.embedding(input)
-        output = F.relu(output)
-        output, hidden = self.gru(output, hidden)
+        return decoder_outputs, decoder_hidden, attentions
+
+
+    def forward_step(self, input, hidden, encoder_outputs):
+        embedded =  self.dropout(self.embedding(input))
+
+        query = hidden.permute(1, 0, 2)
+        context, attn_weights = self.attention(query, encoder_outputs)
+        input_gru = torch.cat((embedded, context), dim=2)
+
+        output, hidden = self.gru(input_gru, hidden)
         output = self.out(output)
-        return output, hidden
+
+        return output, hidden, attn_weights
 
 def indexesFromSentence(lang, sentence):
     return [lang.word2index[word] for word in sentence.split(' ')]
@@ -314,10 +345,10 @@ batch_size = 32
 input_lang, output_lang, train_dataloader, pairs = get_dataloader(batch_size)
 
 encoder = EncoderRNN(input_lang.n_words, hidden_size).to(device)
-decoder = DecoderRNN(hidden_size, output_lang.n_words).to(device)
+decoder = AttnDecoderRNN(hidden_size, output_lang.n_words).to(device)
 
 print("Training...")
-train(train_dataloader, encoder, decoder, 10, print_every=1, plot_every=5)
+train(train_dataloader, encoder, decoder, 20, print_every=5, plot_every=5)
 
 encoder.eval()
 decoder.eval()
