@@ -1,3 +1,6 @@
 .DS_Store
+*.exe
+*.exp
+*.lib
 __pycache__
 tmp
