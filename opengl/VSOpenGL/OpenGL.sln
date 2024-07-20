@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Triangle", "Triangle\Triangle.vcxproj", "{B177896F-4CBF-418B-9211-13D99C13C4EC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlutTriangle", "GlutTriangle\GlutTriangle.vcxproj", "{B177896F-4CBF-418B-9211-13D99C13C4EC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TriangleAnimation", "TriangleAnimation\TriangleAnimation.vcxproj", "{F026B1A2-DB73-4C22-AB67-C9394972E5CE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlutTriangleAnimation", "GlutTriangleAnimation\GlutTriangleAnimation.vcxproj", "{F026B1A2-DB73-4C22-AB67-C9394972E5CE}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShowImage", "ShowImage\ShowImage.vcxproj", "{1B6CE5A6-307C-4F85-9789-F18F36CA36D9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DynamicWindowDims", "DynamicWindowDims\DynamicWindowDims.vcxproj", "{20FE824B-8778-492C-9C09-E7E89ADCB1C1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImageFilters", "ImageFilters\ImageFilters.vcxproj", "{2A8DD4CB-162D-4ED0-B15A-63887CD1EBA6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlfwTriangle", "GlfwTriangle\GlfwTriangle.vcxproj", "{2231D318-7F7F-4321-8B7E-9337DF53B516}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shader", "Shader\Shader.vcxproj", "{2231D318-7F7F-4321-8B7E-9337DF53B516}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlfwRectangle", "GlfwRectangle\GlfwRectangle.vcxproj", "{19E79B1E-7171-484B-8075-6D5117DFB138}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,14 +55,6 @@ Global
 		{20FE824B-8778-492C-9C09-E7E89ADCB1C1}.Release|x64.Build.0 = Release|x64
 		{20FE824B-8778-492C-9C09-E7E89ADCB1C1}.Release|x86.ActiveCfg = Release|Win32
 		{20FE824B-8778-492C-9C09-E7E89ADCB1C1}.Release|x86.Build.0 = Release|Win32
-		{2A8DD4CB-162D-4ED0-B15A-63887CD1EBA6}.Debug|x64.ActiveCfg = Debug|x64
-		{2A8DD4CB-162D-4ED0-B15A-63887CD1EBA6}.Debug|x64.Build.0 = Debug|x64
-		{2A8DD4CB-162D-4ED0-B15A-63887CD1EBA6}.Debug|x86.ActiveCfg = Debug|Win32
-		{2A8DD4CB-162D-4ED0-B15A-63887CD1EBA6}.Debug|x86.Build.0 = Debug|Win32
-		{2A8DD4CB-162D-4ED0-B15A-63887CD1EBA6}.Release|x64.ActiveCfg = Release|x64
-		{2A8DD4CB-162D-4ED0-B15A-63887CD1EBA6}.Release|x64.Build.0 = Release|x64
-		{2A8DD4CB-162D-4ED0-B15A-63887CD1EBA6}.Release|x86.ActiveCfg = Release|Win32
-		{2A8DD4CB-162D-4ED0-B15A-63887CD1EBA6}.Release|x86.Build.0 = Release|Win32
 		{2231D318-7F7F-4321-8B7E-9337DF53B516}.Debug|x64.ActiveCfg = Debug|x64
 		{2231D318-7F7F-4321-8B7E-9337DF53B516}.Debug|x64.Build.0 = Debug|x64
 		{2231D318-7F7F-4321-8B7E-9337DF53B516}.Debug|x86.ActiveCfg = Debug|Win32
@@ -71,6 +63,14 @@ Global
 		{2231D318-7F7F-4321-8B7E-9337DF53B516}.Release|x64.Build.0 = Release|x64
 		{2231D318-7F7F-4321-8B7E-9337DF53B516}.Release|x86.ActiveCfg = Release|Win32
 		{2231D318-7F7F-4321-8B7E-9337DF53B516}.Release|x86.Build.0 = Release|Win32
+		{19E79B1E-7171-484B-8075-6D5117DFB138}.Debug|x64.ActiveCfg = Debug|x64
+		{19E79B1E-7171-484B-8075-6D5117DFB138}.Debug|x64.Build.0 = Debug|x64
+		{19E79B1E-7171-484B-8075-6D5117DFB138}.Debug|x86.ActiveCfg = Debug|Win32
+		{19E79B1E-7171-484B-8075-6D5117DFB138}.Debug|x86.Build.0 = Debug|Win32
+		{19E79B1E-7171-484B-8075-6D5117DFB138}.Release|x64.ActiveCfg = Release|x64
+		{19E79B1E-7171-484B-8075-6D5117DFB138}.Release|x64.Build.0 = Release|x64
+		{19E79B1E-7171-484B-8075-6D5117DFB138}.Release|x86.ActiveCfg = Release|Win32
+		{19E79B1E-7171-484B-8075-6D5117DFB138}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
