@@ -1,8 +1,12 @@
 .DS_Store
 .vscode
+*.exe
+*.exp
+*.lib
 *.o
 *.png
 *.so
 *.txt
 __pycache__
+Debug
 tmp
