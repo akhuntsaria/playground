@@ -1,5 +1,8 @@
 .DS_Store
+.vscode
 *.o
+*.png
 *.so
+*.txt
 __pycache__
 tmp
