@@ -23,8 +23,8 @@ print(device)
 SOS_token = 0
 EOS_token = 1
 
-MAX_LENGTH = 4
-MAX_LINES = 1000
+MAX_LENGTH = 10
+MAX_LINES = 50000
 
 class Lang:
     def __init__(self, name):
@@ -280,6 +280,7 @@ def showPlot(points):
     loc = ticker.MultipleLocator(base=0.2)
     ax.yaxis.set_major_locator(loc)
     plt.plot(points)
+    plt.savefig('tmp/fig.png')
 
 def train(train_dataloader, encoder, decoder, n_epochs, learning_rate=0.001,
                print_every=100, plot_every=100):
@@ -347,13 +348,44 @@ input_lang, output_lang, train_dataloader, pairs = get_dataloader(batch_size)
 encoder = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 decoder = AttnDecoderRNN(hidden_size, output_lang.n_words).to(device)
 
-print("Training...")
-train(train_dataloader, encoder, decoder, 20, print_every=5, plot_every=5)
+# Load models from files if they exist
+if os.path.exists('tmp/encoder.pt'):
+    encoder.load_state_dict(torch.load('tmp/encoder.pt'))
+    decoder.load_state_dict(torch.load('tmp/decoder.pt'))
+else:
+    print("Training...")
+    train(train_dataloader, encoder, decoder, 10, print_every=1, plot_every=5)
+    
+    torch.save(encoder.state_dict(), 'tmp/encoder.pt')
+    torch.save(decoder.state_dict(), 'tmp/decoder.pt')
 
 encoder.eval()
 decoder.eval()
 evaluateRandomly(encoder, decoder, pairs)
 
+def showAttention(input_sentence, output_words, attentions):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    cax = ax.matshow(attentions.cpu().numpy(), cmap='bone')
+    fig.colorbar(cax)
+
+    # Set up axes
+    ax.set_xticklabels([''] + input_sentence.split(' ') + ['<EOS>'], rotation=90)
+    ax.set_yticklabels([''] + output_words)
+
+    # Show label at every tick
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+
+    plt.savefig('tmp/attention.png', bbox_inches='tight', pad_inches=0.3)
+
+def evaluateAndShowAttention(input_sentence):
+    output_words, attentions = evaluate(encoder, decoder, input_sentence, input_lang, output_lang)
+    print('input =', input_sentence)
+    print('output =', ' '.join(output_words))
+    showAttention(input_sentence, output_words, attentions[0, :len(output_words), :])
+
+evaluateAndShowAttention('nie jestem starszy od niego')
+
 #TODO
-#Save the model
 #Interactive evaluation

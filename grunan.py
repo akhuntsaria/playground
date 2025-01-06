@@ -16,8 +16,8 @@ import matplotlib.ticker as ticker
 os.system('clear')
 
 # Fix NaNs and revert
-#device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
-device = torch.device("cpu")
+device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+#device = torch.device("cpu")
 print(device)
 
 SOS_token = 0
@@ -317,20 +317,7 @@ input_lang, output_lang, train_dataloader, pairs = get_dataloader(batch_size)
 encoder = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 decoder = DecoderRNN(hidden_size, output_lang.n_words).to(device)
 
-# Load models from files if they exist
-if os.path.exists('tmp/encoder.pt'):
-    encoder.load_state_dict(torch.load('tmp/encoder.pt'))
-    decoder.load_state_dict(torch.load('tmp/decoder.pt'))
-else:
-    print("Training...")
-    train(train_dataloader, encoder, decoder, 10, print_every=1, plot_every=5)
-    
-    torch.save(encoder.state_dict(), 'tmp/encoder.pt')
-    torch.save(decoder.state_dict(), 'tmp/decoder.pt')
-
 encoder.eval()
 decoder.eval()
 evaluateRandomly(encoder, decoder, pairs)
 
-#TODO
-#Interactive evaluation
